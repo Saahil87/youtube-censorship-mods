@@ -1,0 +1,280 @@
+---
+title: "Project-Classification"
+output: html_notebook
+---
+
+
+```{r}
+
+
+
+train_x <- read.csv ('./data/data_2022-05-08/even/10/X_train.csv', 
+                   header = TRUE, 
+                   sep = ",", 
+                   strip.white = TRUE,
+                   na.strings = "?", 
+                   stringsAsFactors = TRUE,
+                   fill = TRUE)
+
+
+
+
+train_y <- read.csv ('./data/data_2022-05-08/even/10/y_train.csv', 
+                   header = TRUE, 
+                   sep = ",", 
+                   strip.white = TRUE,
+                   na.strings = "?", 
+                   stringsAsFactors = TRUE,
+                   fill = TRUE)
+
+
+test_x <- read.csv ('./data/data_2022-05-08/even/10/X_test.csv', 
+                   header = TRUE, 
+                   sep = ",", 
+                   strip.white = TRUE,
+                   na.strings = "?", 
+                   stringsAsFactors = TRUE,
+                   fill = TRUE)
+
+test_y <- read.csv ('./data/data_2022-05-08/even/10/y_test.csv', 
+                   header = TRUE, 
+                   sep = ",", 
+                   strip.white = TRUE,
+                   na.strings = "?", 
+                   stringsAsFactors = TRUE,
+                   fill = TRUE)
+
+
+train_x["interesting_removal"] = list(as.logical(unlist(train_y["interesting_removal_2"])))
+test_x["interesting_removal"] = list(as.logical(unlist(test_y["interesting_removal_2"])))
+
+
+
+
+
+
+train = train_x
+test = test_x
+```
+
+
+```{r}
+
+
+model <- glm(interesting_removal ~  lr  + AntiSJW + AntiTheist + Black + Conspiracy + LGBT + LateNightTalkShow + Libertarian + MRA + MainstreamNews + PartisanLeft + PartisanRight + Politician + QAnon + ReligiousConservative + SocialJustice + Socialist + StateFunded + WhiteIdentitarian + durationSecs, data=train, family = "binomial")
+
+```
+
+```{r}
+
+
+
+
+## Logistic Regression
+
+trainPreds = as.integer(predict(model, train, type="response")>=0.5)
+testPreds = as.integer(predict(model, test, type="response")>=0.5)
+
+trainAccuracy = sum(trainPreds==train$interesting_removal)/dim(train)[1]
+testAccuracy = sum(testPreds==test$interesting_removal)/dim(test)[1]
+
+
+
+
+
+TP_train = sum(as.integer((trainPreds==1) & (train$interesting_removal==1)))
+FP_train = sum(as.integer((trainPreds==0) & (train$interesting_removal==1)))
+FN_train = sum(as.integer((trainPreds==1) & (train$interesting_removal==0)))
+
+TP_test = sum(as.integer((testPreds==1) & (test$interesting_removal==1)))
+FP_test = sum(as.integer((testPreds==0) & (test$interesting_removal==1)))
+FN_test = sum(as.integer((testPreds==1) & (test$interesting_removal==0)))
+
+
+prec_train = TP_train/(TP_train + FP_train)
+prec_test = TP_test/(TP_test + FP_test)
+
+
+recall_train = TP_train/(TP_train + FN_train)
+recall_test = TP_test/(TP_test + FN_test)
+
+
+sprintf("Train Accuracy: %.4f", trainAccuracy)
+sprintf("Test Accuracy: %.4f", testAccuracy)
+
+sprintf("Train Precision: %.4f", prec_train)
+sprintf("Test Precision: %.4f", prec_test)
+
+
+sprintf("Train Recall: %.4f", recall_train)
+sprintf("Test Recall: %.4f", recall_test)
+
+
+
+summary(model)
+
+#sink("summary.txt")
+#summary(model)
+#sink()
+
+nrow(as.array(as.factor(trainPreds)))
+
+
+
+
+```
+
+```{r}
+
+#install.packages('caret')
+library(caret)
+
+
+
+
+
+cm <- confusionMatrix(data=as.factor(test$removed), reference = as.array(as.factor(testPreds)))
+
+
+cm
+
+```
+
+
+
+
+
+
+```{r}
+
+train
+```
+
+
+```{r}
+
+
+
+```
+
+
+```{r}
+
+#library(randomForest)
+
+require(tree)
+
+
+model <- randomForest(interesting_removal ~  lr  + AntiSJW + AntiTheist + Black + Conspiracy + LGBT + LateNightTalkShow + Libertarian + MRA + MainstreamNews + PartisanLeft + PartisanRight + Politician + QAnon + ReligiousConservative + SocialJustice + Socialist + StateFunded + WhiteIdentitarian + durationSecs, data=train, family = "binomial", kernel="linear")
+
+
+
+
+## Random Forest
+
+trainPreds = as.integer(predict(model, train, type="response")>=0.5)
+testPreds = as.integer(predict(model, test, type="response")>=0.5)
+
+trainAccuracy = sum(trainPreds==train$interesting_removal)/dim(train)[1]
+testAccuracy = sum(testPreds==test$interesting_removal)/dim(test)[1]
+
+
+
+
+
+TP_train = sum(as.integer((trainPreds==1) & (train$interesting_removal==1)))
+FP_train = sum(as.integer((trainPreds==0) & (train$interesting_removal==1)))
+FN_train = sum(as.integer((trainPreds==1) & (train$interesting_removal==0)))
+
+TP_test = sum(as.integer((testPreds==1) & (test$interesting_removal==1)))
+FP_test = sum(as.integer((testPreds==0) & (test$interesting_removal==1)))
+FN_test = sum(as.integer((testPreds==1) & (test$interesting_removal==0)))
+
+
+prec_train = TP_train/(TP_train + FP_train)
+prec_test = TP_test/(TP_test + FP_test)
+
+
+recall_train = TP_train/(TP_train + FN_train)
+recall_test = TP_test/(TP_test + FN_test)
+
+
+sprintf("Train Accuracy: %.4f", trainAccuracy)
+sprintf("Test Accuracy: %.4f", testAccuracy)
+
+sprintf("Train Precision: %.4f", prec_train)
+sprintf("Test Precision: %.4f", prec_test)
+
+
+sprintf("Train Recall: %.4f", recall_train)
+sprintf("Test Recall: %.4f", recall_test)
+
+
+
+
+```
+
+
+```{r}
+#library(randomForest)
+
+#require(tree)
+
+
+model <- tree(interesting_removal ~  lr  + AntiSJW + AntiTheist + Black + Conspiracy + LGBT + LateNightTalkShow + Libertarian + MRA + MainstreamNews + PartisanLeft + PartisanRight + Politician + QAnon + ReligiousConservative + SocialJustice + Socialist + StateFunded + WhiteIdentitarian + durationSecs, data=train)
+
+
+
+
+## Random Forest
+
+trainPreds = as.integer(predict(model, train)>=0.5)
+testPreds = as.integer(predict(model, test)>=0.5)
+
+trainAccuracy = sum(trainPreds==train$interesting_removal)/dim(train)[1]
+testAccuracy = sum(testPreds==test$interesting_removal)/dim(test)[1]
+
+
+
+
+
+TP_train = sum(as.integer((trainPreds==1) & (train$interesting_removal==1)))
+FP_train = sum(as.integer((trainPreds==0) & (train$interesting_removal==1)))
+FN_train = sum(as.integer((trainPreds==1) & (train$interesting_removal==0)))
+
+TP_test = sum(as.integer((testPreds==1) & (test$interesting_removal==1)))
+FP_test = sum(as.integer((testPreds==0) & (test$interesting_removal==1)))
+FN_test = sum(as.integer((testPreds==1) & (test$interesting_removal==0)))
+
+
+prec_train = TP_train/(TP_train + FP_train)
+prec_test = TP_test/(TP_test + FP_test)
+
+
+recall_train = TP_train/(TP_train + FN_train)
+recall_test = TP_test/(TP_test + FN_test)
+
+
+sprintf("Train Accuracy: %.4f", trainAccuracy)
+sprintf("Test Accuracy: %.4f", testAccuracy)
+
+sprintf("Train Precision: %.4f", prec_train)
+sprintf("Test Precision: %.4f", prec_test)
+
+
+sprintf("Train Recall: %.4f", recall_train)
+sprintf("Test Recall: %.4f", recall_test)
+
+
+
+summary(model)
+
+#sink("summary.txt")
+#summary(model)
+#sink()
+
+nrow(as.array(as.factor(trainPreds)))
+
+```
+
+```

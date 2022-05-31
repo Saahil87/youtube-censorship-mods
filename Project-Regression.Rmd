@@ -1,0 +1,89 @@
+---
+title: "Project-Regression"
+output: html_notebook
+---
+
+```{r}
+
+
+train <- read.table ('./data_files/train_regression.csv', 
+                   header = TRUE, 
+                   sep = ",", 
+                   strip.white = TRUE,
+                   na.strings = "?", 
+                   stringsAsFactors = TRUE)
+
+test <- read.table ('./data_files/test_regression.csv', 
+                   header = TRUE, 
+                   sep = ",", 
+                   strip.white = TRUE,
+                   na.strings = "?", 
+                   stringsAsFactors = TRUE)
+
+
+
+#train
+```
+
+
+
+
+```{r}
+
+
+model = lm(removeTime ~ durationSecs + videoViews + channelViews + subs, data=train) # Model 1
+
+
+trainPreds = predict(model, train)
+testPreds = predict(model, test)
+
+trainMSE = sqrt(mean((trainPreds - train$removeTime)^2))
+testMSE = sqrt(mean((testPreds - test$removeTime)^2))
+
+
+sprintf("Train MSE %.4f", trainMSE)
+sprintf("Test MSE %.4f", testMSE)
+```
+
+```{r}
+
+
+model = lm(removeTime ~ durationSecs + videoViews + channelViews + subs + lr, data=train) # Model 2
+
+
+trainPreds = predict(model, train)
+testPreds = predict(model, test)
+
+trainMSE = sqrt(mean((trainPreds - train$removeTime)^2))
+testMSE = sqrt(mean((testPreds - test$removeTime)^2))
+
+
+sprintf("Train MSE %.4f", trainMSE)
+sprintf("Test MSE %.4f", testMSE)
+
+
+summary(model)
+
+```
+
+```{r}
+
+
+model = lm(removeTime ~ channelId + durationSecs + videoViews + channelViews + subs + lr, data=train) # Model 3
+
+trainPreds = predict(model, train)
+testPreds = predict(model, test)
+
+trainMSE = sqrt(mean((trainPreds - train$removeTime)^2))
+testMSE = sqrt(mean((testPreds - test$removeTime)^2))
+
+
+sprintf("Train MSE %.4f", trainMSE)
+sprintf("Test MSE %.4f", testMSE)
+
+
+summary(model)
+
+```
+
+
